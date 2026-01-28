@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  BarChart, Bar, XAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell
+  BarChart, Bar, XAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
 import {
   Zap, Sparkles, Clock, LayoutGrid, Play, X
@@ -19,7 +19,7 @@ const BAR_COLOR = '#3f3f46';
 const BAR_ACTIVE_COLOR = '#e4e4e7';
 
 const Dashboard: React.FC<DashboardProps> = ({ data, onOpenRecap, onRefresh }) => {
-  const topApps = data.apps.slice(0, 5);
+  const topApps = data.apps.slice(0, 4);
   const [selectedApp, setSelectedApp] = useState<AppUsage | null>(null);
 
   const handleCategorySelect = async (category: string) => {
@@ -112,46 +112,120 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onOpenRecap, onRefresh }) =
         {/* Charts Section */}
         <div className="space-y-6">
           <h3 className="text-xl font-light text-white/80 px-2">{t.focusDistribution}</h3>
-          <div className="h-64 w-full bg-zinc-900/20 rounded-3xl border border-white/5 p-6 relative overflow-hidden">
-            {/* Decorative gradient behind chart */}
-            <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
 
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topApps} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#71717a', fontSize: 11, fontWeight: 500 }}
-                  dy={10}
-                  interval={0}
-                  tickFormatter={(val) => val.length > 12 ? `${val.slice(0, 10)}..` : val}
-                />
-                <RechartsTooltip
-                  cursor={{ fill: 'rgba(255,255,255,0.03)', radius: 8 }}
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-black/80 border border-white/10 p-3 rounded-xl text-xs text-white shadow-2xl backdrop-blur-md">
-                          <span className="font-bold block mb-1">{payload[0].payload.name}</span>
-                          <span className="text-zinc-400">{formatDuration(payload[0].value as number)}</span>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar dataKey="durationSeconds" radius={[6, 6, 6, 6]} barSize={48}>
-                  {topApps.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={index === 0 ? BAR_ACTIVE_COLOR : BAR_COLOR}
-                      className="transition-all duration-300 hover:opacity-80"
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          {/* 2-Column Grid for Charts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {/* Bar Chart - Top Apps */}
+            <div className="h-64 bg-zinc-900/20 rounded-3xl border border-white/5 p-6 relative overflow-hidden">
+              <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topApps} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#71717a', fontSize: 11, fontWeight: 500 }}
+                    dy={10}
+                    interval={0}
+                    tickFormatter={(val) => val.length > 12 ? `${val.slice(0, 10)}..` : val}
+                  />
+                  <RechartsTooltip
+                    animationDuration={0}
+                    isAnimationActive={false}
+                    cursor={{ fill: 'rgba(255,255,255,0.03)', radius: 8 }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-black/80 border border-white/10 p-3 rounded-xl text-xs text-white shadow-2xl backdrop-blur-md">
+                            <span className="font-bold block mb-1">{payload[0].payload.name}</span>
+                            <span className="text-zinc-400">{formatDuration(payload[0].value as number)}</span>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar dataKey="durationSeconds" radius={[6, 6, 6, 6]} barSize={48}>
+                    {topApps.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={index === 0 ? BAR_ACTIVE_COLOR : BAR_COLOR}
+                        className="transition-all duration-300 hover:opacity-80"
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Pie Chart - Category Distribution */}
+            <div className="h-64 bg-zinc-900/40 rounded-3xl border border-white/5 p-6 relative overflow-hidden flex items-center justify-center">
+              <div className="absolute -top-20 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+
+              {(() => {
+                // Calculate category totals
+                const categoryTotals: Record<string, number> = {};
+                data.apps.forEach(app => {
+                  const category = app.category;
+                  categoryTotals[category] = (categoryTotals[category] || 0) + app.durationSeconds;
+                });
+
+                // Convert to array and sort
+                const categoryData = Object.entries(categoryTotals)
+                  .map(([name, value]) => ({ name, value }))
+                  .sort((a, b) => b.value - a.value);
+
+                // Pastel colors matching the reference image
+                const COLORS = ['#f87171', '#93c5fd', '#86efac', '#a78bfa', '#fde047', '#fca5a5'];
+
+                return (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {categoryData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                            className="transition-all duration-300 hover:opacity-80"
+                          />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip
+                        animationDuration={0}
+                        isAnimationActive={false}
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            const categoryName = (t as any)[data.name] || data.name;
+                            const total = categoryData.reduce((sum, item) => sum + item.value, 0);
+                            const percentage = ((data.value / total) * 100).toFixed(0);
+                            return (
+                              <div className="bg-black/80 border border-white/10 p-3 rounded-xl text-xs text-white shadow-2xl backdrop-blur-md">
+                                <span className="font-bold block mb-1">{categoryName}</span>
+                                <span className="text-zinc-400">{formatDuration(data.value)}</span>
+                                <span className="text-zinc-500 block mt-1">%{percentage}</span>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                );
+              })()}
+            </div>
+
           </div>
         </div>
 
