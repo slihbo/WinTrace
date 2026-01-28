@@ -1,0 +1,5 @@
+{
+  "name": "WinRecap",
+  "description": "A modern Windows usage dashboard that visualizes application time and categorizes productivity.",
+  "requestFramePermissions": []
+}

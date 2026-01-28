@@ -1,0 +1,59 @@
+{
+  "version": 2,
+  "dgSpecHash": "URTO1ncUD6g=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\salih\\Documents\\windowsrecap\\RecapTrackerWinUI\\RecapTrackerWinUI.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\salih\\.nuget\\packages\\h.generatedicons.system.drawing\\2.1.0\\h.generatedicons.system.drawing.2.1.0.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\h.notifyicon\\2.1.0\\h.notifyicon.2.1.0.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\h.notifyicon.winui\\2.1.0\\h.notifyicon.winui.2.1.0.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.win32.systemevents\\8.0.0\\microsoft.win32.systemevents.8.0.0.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.windows.sdk.buildtools\\10.0.22621.756\\microsoft.windows.sdk.buildtools.10.0.22621.756.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.windowsappsdk\\1.5.240627000\\microsoft.windowsappsdk.1.5.240627000.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\system.drawing.common\\8.0.7\\system.drawing.common.8.0.7.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\system.text.encodings.web\\8.0.0\\system.text.encodings.web.8.0.0.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\system.text.json\\8.0.0\\system.text.json.8.0.0.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\9.0.12\\microsoft.netcore.app.runtime.win-x64.9.0.12.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x86\\9.0.12\\microsoft.netcore.app.runtime.win-x86.9.0.12.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.netcore.app.runtime.win-arm64\\9.0.12\\microsoft.netcore.app.runtime.win-arm64.9.0.12.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\9.0.12\\microsoft.windowsdesktop.app.runtime.win-x64.9.0.12.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x86\\9.0.12\\microsoft.windowsdesktop.app.runtime.win-x86.9.0.12.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-arm64\\9.0.12\\microsoft.windowsdesktop.app.runtime.win-arm64.9.0.12.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\9.0.12\\microsoft.aspnetcore.app.runtime.win-x64.9.0.12.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x86\\9.0.12\\microsoft.aspnetcore.app.runtime.win-x86.9.0.12.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-arm64\\9.0.12\\microsoft.aspnetcore.app.runtime.win-arm64.9.0.12.nupkg.sha512",
+    "C:\\Users\\salih\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.22621.57\\microsoft.windows.sdk.net.ref.10.0.22621.57.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "'System.Text.Json' 8.0.0 paketinde önem derecesi yüksek olan bilinen bir https://github.com/advisories/GHSA-8g4q-xg66-9fp4 güvenlik açığı var",
+      "projectPath": "C:\\Users\\salih\\Documents\\windowsrecap\\RecapTrackerWinUI\\RecapTrackerWinUI.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\salih\\Documents\\windowsrecap\\RecapTrackerWinUI\\RecapTrackerWinUI.csproj",
+      "libraryId": "System.Text.Json",
+      "targetGraphs": [
+        "net9.0-windows10.0.22621",
+        "net9.0-windows10.0.22621/win-arm64",
+        "net9.0-windows10.0.22621/win-x64",
+        "net9.0-windows10.0.22621/win-x86"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "'System.Text.Json' 8.0.0 paketinde önem derecesi yüksek olan bilinen bir https://github.com/advisories/GHSA-hh2w-p6rv-4g7w güvenlik açığı var",
+      "projectPath": "C:\\Users\\salih\\Documents\\windowsrecap\\RecapTrackerWinUI\\RecapTrackerWinUI.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\salih\\Documents\\windowsrecap\\RecapTrackerWinUI\\RecapTrackerWinUI.csproj",
+      "libraryId": "System.Text.Json",
+      "targetGraphs": [
+        "net9.0-windows10.0.22621",
+        "net9.0-windows10.0.22621/win-arm64",
+        "net9.0-windows10.0.22621/win-x64",
+        "net9.0-windows10.0.22621/win-x86"
+      ]
+    }
+  ]
+}

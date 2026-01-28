@@ -1,0 +1,12 @@
+App Constructor
+OnLaunched
+Launch Error: Microsoft.UI.Xaml.Markup.XamlParseException: Bu hata koduyla ilişkili metin bulunamadı.
+
+Cannot find a Resource with the Name/Key TextFillColorSecondaryBrush [Line: 0 Position: 0]
+   at WinRT.ExceptionHelpers.<ThrowExceptionForHR>g__Throw|38_0(Int32 hr)
+   at WinRT.ExceptionHelpers.ThrowExceptionForHR(Int32 hr)
+   at ABI.Microsoft.UI.Xaml.IApplicationStaticsMethods.LoadComponent(IObjectReference _obj, Object component, Uri resourceLocator, ComponentResourceLocation componentResourceLocation)
+   at Microsoft.UI.Xaml.Application.LoadComponent(Object component, Uri resourceLocator, ComponentResourceLocation componentResourceLocation)
+   at RecapTrackerWinUI.MainWindow.InitializeComponent() in C:\Users\salih\Documents\windowsrecap\RecapTrackerWinUI\obj\x64\Release\net9.0-windows10.0.22621.0\win-x64\MainWindow.g.i.cs:line 41
+   at RecapTrackerWinUI.MainWindow..ctor() in C:\Users\salih\Documents\windowsrecap\RecapTrackerWinUI\MainWindow.xaml.cs:line 21
+   at RecapTrackerWinUI.App.OnLaunched(LaunchActivatedEventArgs args) in C:\Users\salih\Documents\windowsrecap\RecapTrackerWinUI\App.xaml.cs:line 28
