@@ -79,4 +79,12 @@ MIT License - Feel free to use and modify!
 
 ## Screenshots
 
-_Add screenshots here_
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Category Selection
+![Category Selection](screenshots/categories.png)
+
+### Yearly Recap
+![Yearly Recap](screenshots/recap.png)
+
