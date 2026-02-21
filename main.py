@@ -39,8 +39,9 @@ DEFAULT_SETTINGS = {
     "language": "auto",
     "autoStart": True,
     "idleThreshold": 180,
-    "trackingInterval": 1,
-    "storageBackend": "json",
+    "idleDetectionEnabled": True,
+    "trackingInterval": 3,
+    "storageBackend": "sqlite",
     "breakReminder": True,
     "breakInterval": 45,
 }
@@ -430,9 +431,10 @@ class PythonAPI:
             auto = AutoStart()
             auto.set_autostart(settings.get("autoStart", True))
 
-            # Apply idle threshold
+            # Apply idle settings
             if app_state["tracker"]:
                 app_state["tracker"].idle_threshold = settings.get("idleThreshold", 180)
+                app_state["tracker"].idle_detection_enabled = settings.get("idleDetectionEnabled", True)
 
             return True
         except Exception as e:

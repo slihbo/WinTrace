@@ -6,6 +6,7 @@ interface SettingsData {
     language: string;
     autoStart: boolean;
     idleThreshold: number;
+    idleDetectionEnabled: boolean;
     trackingInterval: number;
     breakReminder: boolean;
     breakInterval: number;
@@ -21,10 +22,11 @@ const defaultSettings: SettingsData = {
     language: 'auto',
     autoStart: true,
     idleThreshold: 180,
-    trackingInterval: 1,
+    idleDetectionEnabled: true,
+    trackingInterval: 3,
     breakReminder: true,
     breakInterval: 45,
-    storageBackend: 'json',
+    storageBackend: 'sqlite',
 };
 
 export default function Settings({ isOpen, onClose }: SettingsProps) {
@@ -92,7 +94,10 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onMouseDown={(e) => e.stopPropagation()}
+        >
             <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-md mx-4 shadow-2xl overflow-hidden">
 
                 {/* Header */}
@@ -147,48 +152,50 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
                         </button>
                     </div>
 
-                    {/* Idle Threshold */}
-                    <div className="space-y-2">
+                    {/* Idle Detection Toggle */}
+                    <div className="flex items-center justify-between">
                         <label className="flex items-center gap-2 text-sm font-medium text-white/80">
                             <Clock size={16} />
-                            {t.settingsIdleThreshold || 'Boşta kalma süresi'}
+                            {t.settingsIdleDetection || 'Boşta kalma tespiti'}
                         </label>
-                        <div className="flex items-center gap-3">
-                            <input
-                                type="range"
-                                min={60}
-                                max={600}
-                                step={30}
-                                value={settings.idleThreshold}
-                                onChange={(e) => saveSettings({ idleThreshold: parseInt(e.target.value) })}
-                                className="flex-1 accent-white"
+                        <button
+                            onClick={() => saveSettings({ idleDetectionEnabled: !settings.idleDetectionEnabled })}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${settings.idleDetectionEnabled ? 'bg-emerald-500' : 'bg-zinc-700'
+                                }`}
+                        >
+                            <div
+                                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${settings.idleDetectionEnabled ? 'translate-x-[22px]' : 'translate-x-0.5'
+                                    }`}
                             />
-                            <span className="text-sm text-white/60 w-16 text-right">
-                                {Math.floor(settings.idleThreshold / 60)} {t.settingsMinutes || 'dk'}
-                            </span>
-                        </div>
-                        <p className="text-xs text-white/40">
-                            {t.settingsIdleDesc || 'Bu süre boyunca mouse/klavye kullanılmazsa takip duraklar'}
-                        </p>
+                        </button>
                     </div>
 
-                    {/* Tracking Interval */}
-                    <div className="space-y-2">
-                        <label className="flex items-center gap-2 text-sm font-medium text-white/80">
-                            <Zap size={16} />
-                            {t.settingsTrackingInterval || 'Takip aralığı'}
-                        </label>
-                        <select
-                            value={settings.trackingInterval}
-                            onChange={(e) => saveSettings({ trackingInterval: parseInt(e.target.value) })}
-                            className="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
-                        >
-                            <option value={1}>1 {t.settingsSeconds || 'saniye'}</option>
-                            <option value={3}>3 {t.settingsSeconds || 'saniye'}</option>
-                            <option value={5}>5 {t.settingsSeconds || 'saniye'}</option>
-                            <option value={10}>10 {t.settingsSeconds || 'saniye'}</option>
-                        </select>
-                    </div>
+                    {/* Idle Threshold */}
+                    {settings.idleDetectionEnabled && (
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-white/40 uppercase tracking-wider ml-6">
+                                {t.settingsIdleThreshold || 'Boşta kalma süresi'}
+                            </label>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="range"
+                                    min={60}
+                                    max={600}
+                                    step={30}
+                                    value={settings.idleThreshold}
+                                    onChange={(e) => saveSettings({ idleThreshold: parseInt(e.target.value) })}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    className="flex-1 accent-white"
+                                />
+                                <span className="text-sm text-white/60 w-16 text-right">
+                                    {Math.floor(settings.idleThreshold / 60)} {t.settingsMinutes || 'dk'}
+                                </span>
+                            </div>
+                            <p className="text-xs text-white/40 ml-6">
+                                {t.settingsIdleDesc || 'Bu süre boyunca mouse/klavye kullanılmazsa takip duraklar'}
+                            </p>
+                        </div>
+                    )}
 
                     {/* Divider */}
                     <div className="border-t border-white/5" />
@@ -217,14 +224,17 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
                                 <input
                                     type="range"
                                     min={15}
-                                    max={120}
-                                    step={5}
+                                    max={300}
+                                    step={15}
                                     value={(settings as any).breakInterval || 45}
                                     onChange={(e) => saveSettings({ breakInterval: parseInt(e.target.value) } as any)}
+                                    onMouseDown={(e) => e.stopPropagation()}
                                     className="flex-1 accent-white"
                                 />
                                 <span className="text-sm text-white/60 w-16 text-right">
-                                    {(settings as any).breakInterval || 45} {t.settingsMinutes || 'dk'}
+                                    {Math.floor(((settings as any).breakInterval || 45) / 60) > 0
+                                        ? `${Math.floor(((settings as any).breakInterval || 45) / 60)}sa ${((settings as any).breakInterval || 45) % 60}dk`
+                                        : `${(settings as any).breakInterval || 45}dk`}
                                 </span>
                             </div>
                             <p className="text-xs text-white/40">

@@ -167,7 +167,7 @@ const App: React.FC = () => {
     <div className="flex flex-col h-screen w-full bg-background overflow-hidden font-sans relative">
 
       {/* Custom Title Bar / Drag Region */}
-      <div className="absolute top-0 left-0 right-0 h-8 z-50 flex items-center justify-between px-2 py-1 select-none pointer-events-none">
+      <div className="absolute top-0 left-0 right-0 h-8 z-40 flex items-center justify-between px-2 py-1 select-none pointer-events-none">
         {/* Drag Region */}
         <div
           className="absolute inset-0 pointer-events-auto"

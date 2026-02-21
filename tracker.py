@@ -6,13 +6,14 @@ import time
 import ctypes
 
 class WindowTracker:
-    def __init__(self, idle_threshold=180):
+    def __init__(self, idle_threshold=180, idle_detection_enabled=True):
         """
         idle_threshold: seconds of no user input before considered idle (default: 3 minutes)
         """
         self.active_app = None
         self.last_check_time = time.time()
         self.idle_threshold = idle_threshold
+        self.idle_detection_enabled = idle_detection_enabled
 
     def get_idle_seconds(self):
         """Returns seconds since last user input (mouse/keyboard)."""
@@ -33,6 +34,8 @@ class WindowTracker:
 
     def is_idle(self):
         """Check if user is idle (no input for idle_threshold seconds)."""
+        if not self.idle_detection_enabled:
+            return False
         return self.get_idle_seconds() >= self.idle_threshold
 
     def get_active_window_info(self):
