@@ -12,6 +12,7 @@ import base64
 import ctypes
 import ctypes.wintypes
 from datetime import datetime, timedelta
+from fpdf import FPDF
 import webview
 import pystray
 from PIL import Image
@@ -443,55 +444,144 @@ class PythonAPI:
 
     # ---- Data Export API ----
 
-    def export_data(self, format_type="json", date_range=None):
-        """
-        Export usage data as JSON or CSV string.
-        format_type: 'json' or 'csv'
-        date_range: optional {start: str, end: str}
-        """
-        with data_lock:
-            data = dict(app_state["usage_data"])
+    def export_data_dialog(self, format_type="json"):
+        """Opens a file dialog to save usage data."""
+        try:
+            if not app_state.get("window"):
+                return False
 
-        # Filter by date range if specified
-        if date_range:
-            try:
-                start = datetime.fromisoformat(date_range['start'].replace('Z', '+00:00')).date()
-                end = datetime.fromisoformat(date_range['end'].replace('Z', '+00:00')).date()
-                filtered = {}
-                for d_str, d_data in data.items():
-                    try:
-                        d = datetime.strptime(d_str, '%Y-%m-%d').date()
-                        if start <= d <= end:
-                            filtered[d_str] = d_data
-                    except ValueError:
-                        continue
-                data = filtered
-            except Exception as e:
-                logger.warning(f"Invalid date range for export: {e}")
+            file_types = (
+                ('JSON files (*.json)', '*.json') if format_type == 'json' else
+                ('CSV files (*.csv)', '*.csv') if format_type == 'csv' else
+                ('PDF files (*.pdf)', '*.pdf')
+            )
+            
+            save_path = app_state["window"].create_file_dialog(
+                webview.SAVE_DIALOG, 
+                directory=os.path.expanduser("~/Documents"),
+                save_filename=f"wintrace_export_{datetime.now().strftime('%Y-%m-%d')}.{format_type}",
+                file_types=(file_types,)
+            )
 
-        if format_type == 'csv':
-            output = io.StringIO()
-            writer = csv.writer(output)
-            writer.writerow(['Date', 'Application', 'Duration (seconds)', 'Category'])
-            for d_str in sorted(data.keys()):
-                apps = _get_apps_data(data[d_str])
-                for app, dur in sorted(apps.items(), key=lambda x: x[1], reverse=True):
-                    writer.writerow([d_str, app, int(dur), get_category(app)])
-            return output.getvalue()
-        else:
-            # JSON export with readable structure
-            export_data = {}
-            for d_str in sorted(data.keys()):
-                apps = _get_apps_data(data[d_str])
-                export_data[d_str] = [
-                    {
-                        "app": app,
-                        "durationSeconds": int(dur),
-                        "category": get_category(app)
-                    }
-                    for app, dur in sorted(apps.items(), key=lambda x: x[1], reverse=True)
-                ]
-            return json.dumps(export_data, indent=2, ensure_ascii=False)
+            if not save_path:
+                return False
+
+            # Get data
+            with data_lock:
+                data = dict(app_state["usage_data"])
+
+            if format_type == 'json':
+                export_json = {}
+                for d_str in sorted(data.keys()):
+                    apps = _get_apps_data(data[d_str])
+                    export_json[d_str] = [
+                        {"app": app, "durationSeconds": int(dur), "category": get_category(app)}
+                        for app, dur in sorted(apps.items(), key=lambda x: x[1], reverse=True)
+                    ]
+                content = json.dumps(export_json, indent=2, ensure_ascii=False)
+                with open(save_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+            
+            elif format_type == 'csv':
+                with open(save_path, 'w', encoding='utf-8-sig', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(['Date', 'Application', 'Duration (seconds)', 'Category'])
+                    for d_str in sorted(data.keys()):
+                        apps = _get_apps_data(data[d_str])
+                        for app, dur in sorted(apps.items(), key=lambda x: x[1], reverse=True):
+                            writer.writerow([d_str, app, int(dur), get_category(app)])
+
+            elif format_type == 'pdf':
+                pdf = FPDF()
+                pdf.add_page()
+                pdf.set_font("Helvetica", "B", 16)
+                pdf.cell(0, 10, "WinTrace Activity Report", ln=True, align='C')
+                pdf.set_font("Helvetica", "", 10)
+                pdf.cell(0, 10, f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=True, align='C')
+                pdf.ln(10)
+
+                for d_str in sorted(data.keys(), reverse=True):
+                    apps = _get_apps_data(data[d_str])
+                    if not apps: continue
+                    
+                    pdf.set_font("Helvetica", "B", 12)
+                    pdf.cell(0, 10, f"Date: {d_str}", ln=True)
+                    pdf.set_font("Helvetica", "B", 10)
+                    pdf.cell(100, 8, "Application", border=1)
+                    pdf.cell(40, 8, "Duration", border=1)
+                    pdf.cell(50, 8, "Category", border=1, ln=True)
+                    
+                    pdf.set_font("Helvetica", "", 9)
+                    for app, dur in sorted(apps.items(), key=lambda x: x[1], reverse=True)[:20]: # Top 20
+                        # Clean app name for PDF compatibility (Latin-1 chars only in default FPDF)
+                        app_clean = app.encode('latin-1', 'replace').decode('latin-1')
+                        h = int(dur // 3600)
+                        m = int((dur % 3600) // 60)
+                        s = int(dur % 60)
+                        dur_str = f"{h}h {m}m {s}s" if h > 0 else f"{m}m {s}s"
+                        
+                        pdf.cell(100, 7, app_clean[:50], border=1)
+                        pdf.cell(40, 7, dur_str, border=1)
+                        pdf.cell(50, 7, get_category(app), border=1, ln=True)
+                    pdf.ln(5)
+                
+                pdf.output(save_path)
+
+            return True
+        except Exception as e:
+            logger.error(f"Export dialog error: {e}")
+            return False
+
+    def import_data_dialog(self):
+        """Opens a file dialog to import JSON data."""
+        try:
+            if not app_state.get("window"):
+                return False
+
+            file_paths = app_state["window"].create_file_dialog(
+                webview.OPEN_DIALOG, 
+                file_types=(('JSON files (*.json)', '*.json'),)
+            )
+
+            if not file_paths or not file_paths[0]:
+                return False
+
+            with open(file_paths[0], 'r', encoding='utf-8') as f:
+                imported_data = json.load(f)
+
+            # Basic validation
+            if not isinstance(imported_data, dict):
+                return False
+
+            with data_lock:
+                current_data = app_state["usage_data"]
+                merged_count = 0
+                for d_str, day_content in imported_data.items():
+                    # Handle both raw format and export format (list of dicts)
+                    apps_to_merge = {}
+                    if isinstance(day_content, list): # Export format
+                        for item in day_content:
+                            if 'app' in item and 'durationSeconds' in item:
+                                apps_to_merge[item['app']] = item['durationSeconds']
+                    elif isinstance(day_content, dict): # Internal format
+                        apps_to_merge = day_content
+                    
+                    if apps_to_merge:
+                        if d_str not in current_data:
+                            current_data[d_str] = {}
+                        
+                        for app, dur in apps_to_merge.items():
+                            current_data[d_str][app] = current_data[d_str].get(app, 0) + dur
+                            merged_count += 1
+                
+                # Save merged data
+                app_state["storage"].save_data(current_data)
+                
+            logger.info(f"Imported {merged_count} application records.")
+            return True
+        except Exception as e:
+            logger.error(f"Import dialog error: {e}")
+            return False
 
     # ---- App Icon API ----
 

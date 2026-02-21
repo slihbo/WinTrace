@@ -33,7 +33,8 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
     const [settings, setSettings] = useState<SettingsData>(defaultSettings);
     const [saving, setSaving] = useState(false);
     const [exporting, setExporting] = useState(false);
-    const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json');
+    const [importing, setImporting] = useState(false);
+    const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'pdf'>('json');
 
     useEffect(() => {
         if (isOpen) {
@@ -70,25 +71,36 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
         setExporting(true);
         try {
             if (window.pywebview?.api) {
-                const data = await window.pywebview.api.export_data(exportFormat);
-                if (data) {
-                    const blob = new Blob([data], {
-                        type: exportFormat === 'csv' ? 'text/csv' : 'application/json'
-                    });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `wintrace_export_${new Date().toISOString().split('T')[0]}.${exportFormat}`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
+                const success = await window.pywebview.api.export_data_dialog(exportFormat);
+                if (success) {
+                    alert(t.settingsSaved || '✓ Kaydedildi');
                 }
             }
         } catch (e) {
             console.error('Export failed:', e);
         }
         setExporting(false);
+    };
+
+    const handleImport = async () => {
+        if (!confirm('Mevcut verilerin üzerine ekleme yapılacak. Devam etmek istiyor musunuz?')) return;
+
+        setImporting(true);
+        try {
+            if (window.pywebview?.api) {
+                const success = await window.pywebview.api.import_data_dialog();
+                if (success) {
+                    alert(t.settingsImportSuccess || 'Veriler başarıyla içe aktarıldı');
+                    window.location.reload(); // Reload to show new data
+                } else {
+                    alert(t.settingsImportError || 'İçe aktarma hatası veya iptal edildi');
+                }
+            }
+        } catch (e) {
+            console.error('Import failed:', e);
+            alert(t.settingsImportError || 'İçe aktarma hatası');
+        }
+        setImporting(false);
     };
 
     if (!isOpen) return null;
@@ -277,11 +289,12 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
                         <div className="flex gap-2">
                             <select
                                 value={exportFormat}
-                                onChange={(e) => setExportFormat(e.target.value as 'json' | 'csv')}
+                                onChange={(e) => setExportFormat(e.target.value as 'json' | 'csv' | 'pdf')}
                                 className="flex-1 bg-zinc-800 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
                             >
                                 <option value="json">JSON</option>
                                 <option value="csv">CSV</option>
+                                <option value="pdf">PDF</option>
                             </select>
                             <button
                                 onClick={handleExport}
@@ -291,6 +304,21 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
                                 {exporting ? '...' : (t.settingsExport || 'Dışa Aktar')}
                             </button>
                         </div>
+                    </div>
+
+                    {/* Data Import */}
+                    <div className="space-y-3">
+                        <label className="flex items-center gap-2 text-sm font-medium text-white/80">
+                            <Upload size={16} />
+                            {t.settingsImportData || 'Verileri İçe Aktar'}
+                        </label>
+                        <button
+                            onClick={handleImport}
+                            disabled={importing}
+                            className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors border border-emerald-500/20 disabled:opacity-50"
+                        >
+                            {importing ? '...' : (t.settingsImport || 'İçe Aktar')}
+                        </button>
                     </div>
                 </div>
 

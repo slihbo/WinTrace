@@ -13,7 +13,8 @@ declare global {
                 set_category: (appId: string, category: string) => Promise<boolean>;
                 get_settings: () => Promise<any>;
                 update_settings: (settings: any) => Promise<boolean>;
-                export_data: (format: string, dateRange?: { start: string, end: string }) => Promise<string>;
+                export_data_dialog: (format: string) => Promise<boolean>;
+                import_data_dialog: () => Promise<boolean>;
                 get_app_icon: (exeName: string) => Promise<string | null>;
             };
         };
