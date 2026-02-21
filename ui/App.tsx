@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Dashboard from './components/Dashboard';
 import RecapView from './components/RecapView';
+import Settings from './components/Settings';
 import { fetchDailyStats, fetchYearlyRecap } from './services/api';
 import { DailyStats, YearlyStats, ViewMode } from './types';
-import { ChevronLeft, ChevronRight, CalendarRange, Check, X, Calendar, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarRange, Check, X, Calendar, Loader2, Settings as SettingsIcon } from 'lucide-react';
 import { t } from './utils/i18n';
 
 const App: React.FC = () => {
@@ -11,6 +12,7 @@ const App: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('daily');
   const [isLoading, setIsLoading] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Custom Date Range State
   const [customRange, setCustomRange] = useState<{ start: Date, end: Date } | null>(null);
@@ -177,6 +179,9 @@ const App: React.FC = () => {
 
         {/* Window Controls */}
         <div className="relative z-10 flex gap-2 pointer-events-auto">
+          <button onClick={() => setIsSettingsOpen(true)} className="p-1 text-zinc-500 hover:text-white transition-colors" title={t.settings || 'Ayarlar'}>
+            <SettingsIcon size={12} />
+          </button>
           <button onClick={() => window.pywebview?.api.minimize_window()} className="p-1 text-zinc-500 hover:text-white transition-colors">
             <svg width="10" height="10" viewBox="0 0 10 2" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="2" rx="1" fill="currentColor" /></svg>
           </button>
@@ -233,6 +238,16 @@ const App: React.FC = () => {
                 <ChevronRight size={16} />
               </button>
             </div>
+
+            {/* Today Button */}
+            {!isToday(currentDate) && viewMode !== 'custom' && (
+              <button
+                onClick={() => { setCurrentDate(new Date()); }}
+                className="px-3 py-2 rounded-full bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-zinc-200 transition-all duration-200 shadow-lg"
+              >
+                {t.today}
+              </button>
+            )}
 
             {/* View Mode Picker */}
             <div className="relative" ref={datePickerRef}>
@@ -325,6 +340,9 @@ const App: React.FC = () => {
           <div className="h-full w-full flex items-center justify-center text-zinc-500">{t.noData}</div>
         )}
       </main>
+
+      {/* Settings Modal */}
+      <Settings isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 };

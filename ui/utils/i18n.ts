@@ -48,6 +48,7 @@ export const translations = {
         categoriesTitle: "KATEGORİLER",
         digitalIdentity: "Dijital kimliğin...",
         introTitle: "Efsanevi Bir Yıldı",
+        today: "Bugün",
 
         // Categories
         Productivity: "Verimlilik",
@@ -61,11 +62,25 @@ export const translations = {
         Cloud: "Bulut & Depolama",
         Other: "Diğer",
 
-        // Days & Months (For mapping)
-        days: ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"],
-        daysShort: ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"],
-        months: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"],
-        monthsShort: ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]
+        // Days & Months (0=Monday to match Python's weekday())
+        days: ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"],
+        daysShort: ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"],
+        months: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"],
+        monthsShort: ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"],
+
+        // Settings
+        settings: "Ayarlar",
+        settingsLanguage: "Dil",
+        settingsAutoDetect: "Otomatik Algıla",
+        settingsAutoStart: "Bilgisayar açılışında başlat",
+        settingsIdleThreshold: "Boşta kalma süresi",
+        settingsMinutes: "dk",
+        settingsIdleDesc: "Bu süre boyunca mouse/klavye kullanılmazsa takip duraklar",
+        settingsTrackingInterval: "Takip aralığı",
+        settingsSeconds: "saniye",
+        settingsExportData: "Verileri Dışa Aktar",
+        settingsExport: "Dışa Aktar",
+        settingsSaved: "✓ Kaydedildi"
     },
     en: {
         loading: "Fetching data...",
@@ -116,6 +131,7 @@ export const translations = {
         categoriesTitle: "CATEGORIES",
         digitalIdentity: "Your digital identity...",
         introTitle: "It was a legendary year",
+        today: "Today",
 
         // Categories
         Productivity: "Productivity",
@@ -129,11 +145,25 @@ export const translations = {
         Cloud: "Cloud & Storage",
         Other: "Other",
 
-        // Days & Months
-        days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        daysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        // Days & Months (0=Monday to match Python's weekday())
+        days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        daysShort: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
         months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-        monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+
+        // Settings
+        settings: "Settings",
+        settingsLanguage: "Language",
+        settingsAutoDetect: "Auto Detect",
+        settingsAutoStart: "Start on system boot",
+        settingsIdleThreshold: "Idle detection threshold",
+        settingsMinutes: "min",
+        settingsIdleDesc: "Tracking pauses when no mouse/keyboard input for this duration",
+        settingsTrackingInterval: "Tracking interval",
+        settingsSeconds: "seconds",
+        settingsExportData: "Export Data",
+        settingsExport: "Export",
+        settingsSaved: "✓ Saved"
     }
 };
 
@@ -144,20 +174,8 @@ export const getLanguage = () => {
 
 export const t = translations[getLanguage()];
 
-// Helper to get day name from index (0=Sunday in JS Date, but we need to match Python or standardize)
-// Python date.weekday(): 0=Monday, 6=Sunday
-// JS Date.getDay(): 0=Sunday, 1=Monday
-// Let's standardize on JS 0=Sunday, 6=Saturday for frontend helpers if possible, 
-// OR simpler: Python returns 0=Monday.
-// Let's use Python's 0=Monday convention for the day indices coming from API for consistency with dailyAverages logic
+// Day arrays are now aligned to Python's weekday() convention: 0=Monday, 6=Sunday
 export const getDayName = (index: number, short = false) => {
-    // Mapping Python (0=Mon) to our arrays where 0=Sun? 
-    // Let's just align the arrays to Python:
-    // tr.days = [Pazartesi, Salı ... Pazar] 
-    // Wait, standard JS getDay() is 0=Sun. 
-    // Let's stick to standard JS 0=Sunday for arrays and convert if needed.
-
-    // Actually, easy fix: Make arrays 0=Monday to match Python's output
     return short ? t.daysShort[index] : t.days[index];
 };
 

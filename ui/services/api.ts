@@ -11,6 +11,10 @@ declare global {
                 close_window: () => void;
                 start_drag: () => void;
                 set_category: (appId: string, category: string) => Promise<boolean>;
+                get_settings: () => Promise<any>;
+                update_settings: (settings: any) => Promise<boolean>;
+                export_data: (format: string, dateRange?: { start: string, end: string }) => Promise<string>;
+                get_app_icon: (exeName: string) => Promise<string | null>;
             };
         };
     }
@@ -95,6 +99,7 @@ export const fetchYearlyRecap = async (): Promise<YearlyStats> => {
                 isProductive: false
             },
             topCategory: "-",
+            categoryBreakdown: [],
             monthlyUsage: Array(12).fill({ month: "-", hours: 0 }),
             dailyAverages: Array(7).fill({ day: 0, hours: 0 }),
             apps: []

@@ -28,14 +28,13 @@ Download the latest `WinTrace.exe` from the [Releases](../../releases) page. No 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/WinTrace.git
+   git clone https://github.com/slihbo/WinTrace.git
    cd WinTrace
    ```
 
 2. **Install Python dependencies**
    ```bash
-   pip install pywebview pystray Pillow pywin32
-   pip install pyinstaller
+   pip install -r requirements.txt
    ```
 
 3. **Build the UI**
