@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, X, Download, Upload, Globe, Monitor, Clock, Zap } from 'lucide-react';
+import { Settings as SettingsIcon, X, Download, Upload, Globe, Monitor, Clock, Zap, Bell, Database } from 'lucide-react';
 import { t } from '../utils/i18n';
 
 interface SettingsData {
@@ -7,6 +7,9 @@ interface SettingsData {
     autoStart: boolean;
     idleThreshold: number;
     trackingInterval: number;
+    breakReminder: boolean;
+    breakInterval: number;
+    storageBackend: string;
 }
 
 interface SettingsProps {
@@ -19,6 +22,9 @@ const defaultSettings: SettingsData = {
     autoStart: true,
     idleThreshold: 180,
     trackingInterval: 1,
+    breakReminder: true,
+    breakInterval: 45,
+    storageBackend: 'json',
 };
 
 export default function Settings({ isOpen, onClose }: SettingsProps) {
@@ -182,6 +188,71 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
                             <option value={5}>5 {t.settingsSeconds || 'saniye'}</option>
                             <option value={10}>10 {t.settingsSeconds || 'saniye'}</option>
                         </select>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-white/5" />
+
+                    {/* Break Reminder */}
+                    <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 text-sm font-medium text-white/80">
+                            <Bell size={16} />
+                            {t.settingsBreakReminder || 'Mola hatırlatıcı'}
+                        </label>
+                        <button
+                            onClick={() => saveSettings({ breakReminder: !(settings as any).breakReminder })}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${(settings as any).breakReminder ? 'bg-emerald-500' : 'bg-zinc-700'
+                                }`}
+                        >
+                            <div
+                                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${(settings as any).breakReminder ? 'translate-x-[22px]' : 'translate-x-0.5'
+                                    }`}
+                            />
+                        </button>
+                    </div>
+
+                    {(settings as any).breakReminder && (
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="range"
+                                    min={15}
+                                    max={120}
+                                    step={5}
+                                    value={(settings as any).breakInterval || 45}
+                                    onChange={(e) => saveSettings({ breakInterval: parseInt(e.target.value) } as any)}
+                                    className="flex-1 accent-white"
+                                />
+                                <span className="text-sm text-white/60 w-16 text-right">
+                                    {(settings as any).breakInterval || 45} {t.settingsMinutes || 'dk'}
+                                </span>
+                            </div>
+                            <p className="text-xs text-white/40">
+                                {t.settingsBreakDesc || 'Kesintisiz çalışma sonrası mola hatırlatması'}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Divider */}
+                    <div className="border-t border-white/5" />
+
+                    {/* Storage Backend */}
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-sm font-medium text-white/80">
+                            <Database size={16} />
+                            {t.settingsStorageBackend || 'Veri depolama'}
+                        </label>
+                        <select
+                            value={(settings as any).storageBackend || 'json'}
+                            onChange={(e) => saveSettings({ storageBackend: e.target.value } as any)}
+                            className="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                        >
+                            <option value="json">JSON</option>
+                            <option value="sqlite">SQLite</option>
+                        </select>
+                        <p className="text-xs text-white/40">
+                            {t.settingsStorageDesc || 'Yeniden başlatma gerektirir. SQLite büyük veri setleri için daha hızlıdır.'}
+                        </p>
                     </div>
 
                     {/* Divider */}

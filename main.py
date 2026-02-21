@@ -17,6 +17,8 @@ import pystray
 from PIL import Image
 from tracker import WindowTracker
 from storage import DataStorage
+from sqlite_storage import SQLiteStorage
+from notifications import BreakReminder
 from categories import get_category, save_custom_category
 import win32gui
 import win32con
@@ -38,6 +40,9 @@ DEFAULT_SETTINGS = {
     "autoStart": True,
     "idleThreshold": 180,
     "trackingInterval": 1,
+    "storageBackend": "json",
+    "breakReminder": True,
+    "breakInterval": 45,
 }
 
 def _get_settings_path():
@@ -75,7 +80,8 @@ app_state = {
     "usage_data": None,
     "window": None,
     "icon": None,
-    "settings": _load_settings()
+    "settings": _load_settings(),
+    "break_reminder": None
 }
 
 def get_resource_path(relative_path):
@@ -608,6 +614,7 @@ class AutoStart:
 def tracker_loop():
     storage = app_state["storage"]
     tracker = app_state["tracker"]
+    break_reminder = app_state.get("break_reminder")
     last_save_time = time.time()
 
     while app_state["running"]:
@@ -615,6 +622,11 @@ def tracker_loop():
             with data_lock:
                 usage_data = app_state["usage_data"]
                 tracker.track(usage_data)
+
+            # Update break reminder
+            if break_reminder:
+                is_idle = tracker.is_idle()
+                break_reminder.update(is_idle=is_idle)
 
             if time.time() - last_save_time > 60:
                 with data_lock:
@@ -660,6 +672,18 @@ def setup_tray():
         )
         icon = pystray.Icon("WinTrace", image, "WinTrace", menu)
         app_state["icon"] = icon
+
+        # Wire break reminder notification through tray icon
+        br = app_state.get("break_reminder")
+        if br:
+            def notify_via_tray(title, message):
+                try:
+                    if app_state.get("icon"):
+                        app_state["icon"].notify(message, title)
+                except Exception as e:
+                    logger.debug(f"Tray notify error: {e}")
+            br.set_notify_callback(notify_via_tray)
+
         icon.run()
     except Exception as e:
         logger.error(f"Tray error: {e}")
@@ -671,11 +695,26 @@ def main():
     auto = AutoStart()
     auto.set_autostart(settings.get("autoStart", True))
 
-    app_state["storage"] = DataStorage()
+    # Select storage backend
+    backend = settings.get("storageBackend", "json")
+    if backend == "sqlite":
+        app_state["storage"] = SQLiteStorage()
+        logger.info("Using SQLite storage backend")
+    else:
+        app_state["storage"] = DataStorage()
+        logger.info("Using JSON storage backend")
+
     app_state["tracker"] = WindowTracker(
         idle_threshold=settings.get("idleThreshold", 180)
     )
     app_state["usage_data"] = app_state["storage"].data
+
+    # Setup break reminder
+    br = BreakReminder(
+        interval_minutes=settings.get("breakInterval", 45),
+        enabled=settings.get("breakReminder", True)
+    )
+    app_state["break_reminder"] = br
 
     # 2. Start Tracker Thread
     t_tracker = threading.Thread(target=tracker_loop)

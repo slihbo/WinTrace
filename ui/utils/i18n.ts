@@ -80,7 +80,11 @@ export const translations = {
         settingsSeconds: "saniye",
         settingsExportData: "Verileri Dışa Aktar",
         settingsExport: "Dışa Aktar",
-        settingsSaved: "✓ Kaydedildi"
+        settingsSaved: "✓ Kaydedildi",
+        settingsBreakReminder: "Mola hatırlatıcı",
+        settingsBreakDesc: "Kesintisiz çalışma sonrası mola hatırlatması",
+        settingsStorageBackend: "Veri depolama",
+        settingsStorageDesc: "Yeniden başlatma gerektirir. SQLite büyük veri setleri için daha hızlıdır."
     },
     en: {
         loading: "Fetching data...",
@@ -163,7 +167,11 @@ export const translations = {
         settingsSeconds: "seconds",
         settingsExportData: "Export Data",
         settingsExport: "Export",
-        settingsSaved: "✓ Saved"
+        settingsSaved: "✓ Saved",
+        settingsBreakReminder: "Break reminder",
+        settingsBreakDesc: "Reminds you to take a break after continuous work",
+        settingsStorageBackend: "Data storage",
+        settingsStorageDesc: "Requires restart. SQLite is faster for large datasets."
     }
 };
 
